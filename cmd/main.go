@@ -2,8 +2,8 @@ package main
 
 import (
 	"pharmacy-pos-backend/config"
-	"pharmacy-pos-backend/internal/controllers"
 	"pharmacy-pos-backend/internal/models"
+	"pharmacy-pos-backend/internal/routes"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,12 +18,7 @@ func main() {
 
 	router := gin.Default()
 
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Welcome to the Pharmacy POS Backend API",
-		})
-	})
-	router.POST("/register", controllers.Register)
+	routes.SetupRoutes(router)
 
 	router.Run(":8080")
 }
