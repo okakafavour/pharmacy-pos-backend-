@@ -4,10 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 )
 
-func RoleMiddleware(requiredRole string) gin.HandlerFunc {
+func RequireRole(role string) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 
@@ -21,11 +20,9 @@ func RoleMiddleware(requiredRole string) gin.HandlerFunc {
 			return
 		}
 
-		claims := user.(jwt.MapClaims)
+		claims := user.(map[string]interface{})
 
-		role := claims["role"].(string)
-
-		if role != requiredRole {
+		if claims["role"] != role {
 			c.JSON(http.StatusForbidden, gin.H{
 				"error": "Access denied",
 			})

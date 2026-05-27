@@ -14,6 +14,8 @@ func main() {
 	config.DB.AutoMigrate(
 		&models.User{},
 		&models.Medicine{},
+		&models.Sale{},
+		&models.SaleItem{},
 	)
 
 	router := gin.Default()

@@ -15,13 +15,24 @@ func SetupRoutes(router *gin.Engine) {
 		})
 	})
 
-	router.POST("/register", controllers.Register)
+	// Public Routes
 	router.POST("/login", controllers.Login)
-	router.POST(
-		"/medicines",
-		middleware.AuthMiddleware(),
-		middleware.RoleMiddleware("admin"),
-		controllers.CreateMedicine,
-	)
-	router.GET("/medicines", controllers.GetMedicines)
+
+	// Protected Routes
+	authorized := router.Group("/")
+	authorized.Use(middleware.AuthMiddleware())
+	{
+		// Any logged in user can view medicines
+		authorized.GET("/medicines", controllers.GetMedicines)
+		authorized.POST("/sales", controllers.CreateSale)
+
+		// Admin Routes
+		admin := authorized.Group("/")
+		admin.Use(middleware.RequireRole("admin"))
+		{
+			admin.POST("/users", controllers.CreateUser)
+
+			admin.POST("/medicines", controllers.CreateMedicine)
+		}
+	}
 }
