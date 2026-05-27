@@ -33,8 +33,10 @@ func SetupRoutes(router *gin.Engine) {
 		admin.Use(middleware.RequireRole("admin"))
 		{
 			admin.POST("/users", controllers.CreateUser)
-
 			admin.POST("/medicines", controllers.CreateMedicine)
+			admin.POST("/suppliers", controllers.CreateSupplier)
+			admin.GET("/suppliers", controllers.GetSuppliers)
+			admin.POST("/restocks", controllers.CreateRestock)
 		}
 	}
 }

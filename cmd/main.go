@@ -16,6 +16,8 @@ func main() {
 		&models.Medicine{},
 		&models.Sale{},
 		&models.SaleItem{},
+		&models.Supplier{},
+		&models.Restock{},
 	)
 
 	router := gin.Default()

@@ -118,13 +118,25 @@ func GetReceipt(c *gin.Context) {
 		return
 	}
 
+	var items []gin.H
+
+	for _, item := range sale.SaleItems {
+
+		items = append(items, gin.H{
+			"medicine": item.Medicine.Name,
+			"quantity": item.Quantity,
+			"price":    item.Price,
+			"subtotal": item.Price * float64(item.Quantity),
+		})
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"receipt": gin.H{
 			"receipt_id": sale.ID,
 			"cashier":    sale.User.Name,
 			"total":      sale.Total,
 			"date":       sale.CreatedAt,
-			"items":      sale.SaleItems,
+			"items":      items,
 		},
 	})
 }
