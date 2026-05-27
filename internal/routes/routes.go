@@ -35,10 +35,9 @@ func SetupRoutes(router *gin.Engine) {
 		authorized.GET("/receipt/:id/pdf", controllers.DownloadReceiptPDF)
 
 		authorized.GET("/medicines/expiring-soon", controllers.GetExpiringSoonMedicines)
-		authorized.GET(
-			"/medicines/barcode/:barcode",
-			controllers.GetMedicineByBarcode,
-		)
+		authorized.GET("/medicines/barcode/:barcode", controllers.GetMedicineByBarcode)
+		authorized.GET("/reports/daily-sales", controllers.GetDailySalesReport)
+		authorized.GET("/reports/top-medicines", controllers.GetTopMedicines)
 
 		// Admin Routes
 		admin := authorized.Group("/")
