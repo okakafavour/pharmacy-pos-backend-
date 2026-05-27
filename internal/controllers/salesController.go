@@ -83,3 +83,18 @@ func CreateSale(c *gin.Context) {
 		"sale_id": sale.ID,
 	})
 }
+
+func GetSales(c *gin.Context) {
+
+	var sales []models.Sale
+
+	config.DB.
+		Preload("User").
+		Preload("SaleItems").
+		Preload("SaleItems.Medicine").
+		Find(&sales)
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": sales,
+	})
+}

@@ -8,6 +8,6 @@ type Sale struct {
 	UserID uint    `json:"user_id"`
 	Total  float64 `json:"total"`
 
-	User      User       `gorm:"foreignKey:UserID"`
-	SaleItems []SaleItem `gorm:"foreignKey:SaleID"`
+	User      User       `json:"user" gorm:"foreignKey:UserID"`
+	SaleItems []SaleItem `json:"sale_items" gorm:"foreignKey:SaleID"`
 }

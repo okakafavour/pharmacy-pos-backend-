@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func RequireRole(role string) gin.HandlerFunc {
@@ -20,7 +21,7 @@ func RequireRole(role string) gin.HandlerFunc {
 			return
 		}
 
-		claims := user.(map[string]interface{})
+		claims := user.(jwt.MapClaims)
 
 		if claims["role"] != role {
 			c.JSON(http.StatusForbidden, gin.H{

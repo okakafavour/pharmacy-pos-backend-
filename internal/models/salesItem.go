@@ -10,5 +10,5 @@ type SaleItem struct {
 	Quantity   int     `json:"quantity"`
 	Price      float64 `json:"price"`
 
-	Medicine Medicine `gorm:"foreignKey:MedicineID"`
+	Medicine Medicine `json:"medicine" gorm:"foreignKey:MedicineID"`
 }

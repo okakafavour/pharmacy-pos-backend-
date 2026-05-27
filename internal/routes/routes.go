@@ -25,6 +25,7 @@ func SetupRoutes(router *gin.Engine) {
 		// Any logged in user can view medicines
 		authorized.GET("/medicines", controllers.GetMedicines)
 		authorized.POST("/sales", controllers.CreateSale)
+		authorized.GET("/sales", controllers.GetSales)
 
 		// Admin Routes
 		admin := authorized.Group("/")
