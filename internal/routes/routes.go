@@ -32,6 +32,7 @@ func SetupRoutes(router *gin.Engine) {
 		authorized.GET("/dashboard/stats", controllers.GetDashboardStats)
 		authorized.POST("/customers", controllers.CreateCustomer)
 		authorized.GET("/customers", controllers.GetCustomers)
+		authorized.GET("/receipt/:id/pdf", controllers.DownloadReceiptPDF)
 
 		authorized.GET("/medicines/expiring-soon", controllers.GetExpiringSoonMedicines)
 
