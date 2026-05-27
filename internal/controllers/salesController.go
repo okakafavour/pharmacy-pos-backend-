@@ -98,3 +98,33 @@ func GetSales(c *gin.Context) {
 		"data": sales,
 	})
 }
+
+func GetReceipt(c *gin.Context) {
+
+	id := c.Param("id")
+
+	var sale models.Sale
+
+	err := config.DB.
+		Preload("User").
+		Preload("SaleItems").
+		Preload("SaleItems.Medicine").
+		First(&sale, id).Error
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Sale not found",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"receipt": gin.H{
+			"receipt_id": sale.ID,
+			"cashier":    sale.User.Name,
+			"total":      sale.Total,
+			"date":       sale.CreatedAt,
+			"items":      sale.SaleItems,
+		},
+	})
+}

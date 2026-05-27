@@ -26,6 +26,7 @@ func SetupRoutes(router *gin.Engine) {
 		authorized.GET("/medicines", controllers.GetMedicines)
 		authorized.POST("/sales", controllers.CreateSale)
 		authorized.GET("/sales", controllers.GetSales)
+		authorized.GET("/sales/:id/receipt", controllers.GetReceipt)
 
 		// Admin Routes
 		admin := authorized.Group("/")
