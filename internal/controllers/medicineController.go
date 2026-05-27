@@ -35,3 +35,42 @@ func GetMedicines(c *gin.Context) {
 		"data": medicines,
 	})
 }
+
+func GetLowStockMedicines(c *gin.Context) {
+
+	var medicines []models.Medicine
+
+	config.DB.
+		Where("stock < ?", 10).
+		Find(&medicines)
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": medicines,
+	})
+}
+
+func GetExpiredMedicines(c *gin.Context) {
+
+	var medicines []models.Medicine
+
+	config.DB.
+		Where("expire_date < NOW()").
+		Find(&medicines)
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": medicines,
+	})
+}
+
+func GetExpiringSoonMedicines(c *gin.Context) {
+
+	var medicines []models.Medicine
+
+	config.DB.
+		Where("expire_date BETWEEN NOW() AND NOW() + INTERVAL '30 days'").
+		Find(&medicines)
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": medicines,
+	})
+}
