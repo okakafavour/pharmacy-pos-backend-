@@ -35,6 +35,10 @@ func SetupRoutes(router *gin.Engine) {
 		authorized.GET("/receipt/:id/pdf", controllers.DownloadReceiptPDF)
 
 		authorized.GET("/medicines/expiring-soon", controllers.GetExpiringSoonMedicines)
+		authorized.GET(
+			"/medicines/barcode/:barcode",
+			controllers.GetMedicineByBarcode,
+		)
 
 		// Admin Routes
 		admin := authorized.Group("/")
@@ -45,6 +49,8 @@ func SetupRoutes(router *gin.Engine) {
 			admin.POST("/suppliers", controllers.CreateSupplier)
 			admin.GET("/suppliers", controllers.GetSuppliers)
 			admin.POST("/restocks", controllers.CreateRestock)
+			admin.PUT("/medicines/:id", controllers.UpdateMedicine)
+			admin.DELETE("/medicines/:id", controllers.DeleteMedicine)
 		}
 	}
 }
