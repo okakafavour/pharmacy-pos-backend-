@@ -13,12 +13,12 @@ import (
 var DB *gorm.DB
 
 func ConnectDatabase() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
+	// Load .env only for local development
+	_ = godotenv.Load()
+
+	dsn := fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
 		os.Getenv("DB_HOST"),
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
@@ -33,5 +33,6 @@ func ConnectDatabase() {
 	}
 
 	DB = database
-	fmt.Println("Database Connected Sucessfully")
+
+	fmt.Println("Database Connected Successfully")
 }
