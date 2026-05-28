@@ -57,6 +57,50 @@ func CreateUser(c *gin.Context) {
 	})
 }
 
+func Register(c *gin.Context) {
+
+	var input RegisterInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// Check if user already exists
+	var existingUser models.User
+
+	config.DB.Where("email = ?", input.Email).First(&existingUser)
+
+	if existingUser.ID != 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "User already exists",
+		})
+		return
+	}
+
+	hashedPassword, _ := bcrypt.GenerateFromPassword(
+		[]byte(input.Password),
+		bcrypt.DefaultCost,
+	)
+
+	user := models.User{
+		Name:     input.Name,
+		Email:    input.Email,
+		Password: string(hashedPassword),
+
+		// Force admin role for public registration
+		Role: "admin",
+	}
+
+	config.DB.Create(&user)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Admin registered successfully",
+	})
+}
+
 func Login(c *gin.Context) {
 
 	var input LoginInput
