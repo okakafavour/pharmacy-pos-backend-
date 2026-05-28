@@ -1,10 +1,15 @@
 package controllers
 
 import (
+	"context"
+	"os"
+
 	"net/http"
 	"pharmacy-pos-backend/config"
 	"pharmacy-pos-backend/internal/models"
 	"pharmacy-pos-backend/internal/utils"
+
+	"google.golang.org/api/idtoken"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -15,6 +20,10 @@ type RegisterInput struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6"`
 	Role     string `json:"role" binding:"required"`
+}
+
+type GoogleLoginInput struct {
+	Token string `json:"token" binding:"required"`
 }
 
 type LoginInput struct {
@@ -79,5 +88,72 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
 		"token":   token,
+	})
+}
+
+func GoogleLogin(c *gin.Context) {
+
+	var input GoogleLoginInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	payload, err := idtoken.Validate(
+		context.Background(),
+		input.Token,
+		os.Getenv("GOOGLE_CLIENT_ID"),
+	)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "Invalid Google token",
+		})
+		return
+	}
+
+	email := payload.Claims["email"].(string)
+	name := payload.Claims["name"].(string)
+
+	var user models.User
+
+	config.DB.Where("email = ?", email).First(&user)
+
+	// create user automatically if not found
+	if user.ID == 0 {
+
+		user = models.User{
+			Name:  name,
+			Email: email,
+			Role:  "staff",
+		}
+
+		config.DB.Create(&user)
+	}
+
+	token, err := utils.GenerateToken(
+		user.ID,
+		user.Email,
+		user.Role,
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Could not generate token",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Google login successful",
+		"token":   token,
+		"user": gin.H{
+			"id":    user.ID,
+			"name":  user.Name,
+			"email": user.Email,
+			"role":  user.Role,
+		},
 	})
 }

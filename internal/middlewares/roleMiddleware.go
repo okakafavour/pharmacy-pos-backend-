@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func RequireRole(role string) gin.HandlerFunc {
+func RequireRole(roles ...string) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 
@@ -23,14 +23,20 @@ func RequireRole(role string) gin.HandlerFunc {
 
 		claims := user.(jwt.MapClaims)
 
-		if claims["role"] != role {
-			c.JSON(http.StatusForbidden, gin.H{
-				"error": "Access denied",
-			})
-			c.Abort()
-			return
+		userRole := claims["role"].(string)
+
+		for _, role := range roles {
+
+			if userRole == role {
+				c.Next()
+				return
+			}
 		}
 
-		c.Next()
+		c.JSON(http.StatusForbidden, gin.H{
+			"error": "Access denied",
+		})
+
+		c.Abort()
 	}
 }
