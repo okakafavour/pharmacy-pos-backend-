@@ -114,20 +114,29 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// Find user
-	config.DB.Where("email = ?", input.Email).First(&user)
+	// Query user
+	result := config.DB.Where("email = ?", input.Email).First(&user)
 
-	// Debug information
-	println("========== LOGIN DEBUG ==========")
-	println("INPUT EMAIL:", input.Email)
-	println("INPUT PASSWORD:", input.Password)
-	println("USER ID:", user.ID)
-	println("DB EMAIL:", user.Email)
-	println("DB ROLE:", user.Role)
+	log.Println("========== LOGIN DEBUG ==========")
+	log.Println("INPUT EMAIL:", input.Email)
 
+	if result.Error != nil {
+		log.Println("QUERY ERROR:", result.Error)
+	}
+
+	log.Println("ROWS FOUND:", result.RowsAffected)
+	log.Println("USER ID:", user.ID)
+	log.Println("DB EMAIL:", user.Email)
+	log.Println("DB ROLE:", user.Role)
+
+	// Show all users visible to GORM
 	var users []models.User
 
-	config.DB.Find(&users)
+	allUsersResult := config.DB.Find(&users)
+
+	if allUsersResult.Error != nil {
+		log.Println("FIND USERS ERROR:", allUsersResult.Error)
+	}
 
 	log.Println("====== USERS IN DATABASE ======")
 
@@ -151,18 +160,16 @@ func Login(c *gin.Context) {
 
 	if err != nil {
 
-		println("PASSWORD CHECK FAILED")
-		println("HASH IN DB:", user.Password)
-		println("BCRYPT ERROR:", err.Error())
+		log.Println("PASSWORD CHECK FAILED")
+		log.Println("BCRYPT ERROR:", err)
 
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"error":   "Password mismatch",
-			"details": err.Error(),
+			"error": "Password mismatch",
 		})
 		return
 	}
 
-	println("LOGIN SUCCESSFUL")
+	log.Println("LOGIN SUCCESSFUL")
 
 	token, err := utils.GenerateToken(
 		user.ID,
