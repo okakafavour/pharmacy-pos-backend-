@@ -18,7 +18,7 @@ func SetupRoutes(router *gin.Engine) {
 	// Public Routes
 	router.POST("/login", controllers.Login)
 	router.POST("/google/login", controllers.GoogleLogin)
-	router.POST("/register", controllers.Register)
+	// router.POST("/register", controllers.Register)
 
 	// Protected Routes
 	authorized := router.Group("/")
