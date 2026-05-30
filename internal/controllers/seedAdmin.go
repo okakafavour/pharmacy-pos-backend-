@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"pharmacy-pos-backend/config"
 	"pharmacy-pos-backend/internal/models"
 
@@ -13,6 +14,8 @@ func SeedAdmin() {
 	config.DB.Where("email = ?", "admin@pharmacy.com").First(&admin)
 
 	if admin.ID == 0 {
+
+		fmt.Println("Creating admin user...")
 
 		hashedPassword, _ := bcrypt.GenerateFromPassword(
 			[]byte("Admin123@"),
@@ -27,5 +30,9 @@ func SeedAdmin() {
 		}
 
 		config.DB.Create(&admin)
+
+		fmt.Println("Admin created successfully")
+	} else {
+		fmt.Println("Admin already exists")
 	}
 }
