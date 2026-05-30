@@ -57,9 +57,54 @@ func CreateUser(c *gin.Context) {
 	})
 }
 
-func Register(c *gin.Context) {
+// func Register(c *gin.Context) {
 
-	var input RegisterInput
+// 	var input RegisterInput
+
+// 	if err := c.ShouldBindJSON(&input); err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{
+// 			"error": err.Error(),
+// 		})
+// 		return
+// 	}
+
+// 	// Check if user already exists
+// 	var existingUser models.User
+
+// 	config.DB.Where("email = ?", input.Email).First(&existingUser)
+
+// 	if existingUser.ID != 0 {
+// 		c.JSON(http.StatusBadRequest, gin.H{
+// 			"error": "User already exists",
+// 		})
+// 		return
+// 	}
+
+// 	hashedPassword, _ := bcrypt.GenerateFromPassword(
+// 		[]byte(input.Password),
+// 		bcrypt.DefaultCost,
+// 	)
+
+// 	user := models.User{
+// 		Name:     input.Name,
+// 		Email:    input.Email,
+// 		Password: string(hashedPassword),
+
+// 		// Force admin role for public registration
+// 		Role: "admin",
+// 	}
+
+// 	config.DB.Create(&user)
+
+// 	c.JSON(http.StatusOK, gin.H{
+// 		"message": "Admin registered successfully",
+// 	})
+// }
+
+func Login(c *gin.Context) {
+
+	var input LoginInput
+	var user models.User
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -68,64 +113,56 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	// Check if user already exists
-	var existingUser models.User
+	// Find user
+	config.DB.Where("email = ?", input.Email).First(&user)
 
-	config.DB.Where("email = ?", input.Email).First(&existingUser)
+	// Debug information
+	println("========== LOGIN DEBUG ==========")
+	println("INPUT EMAIL:", input.Email)
+	println("INPUT PASSWORD:", input.Password)
+	println("USER ID:", user.ID)
+	println("DB EMAIL:", user.Email)
+	println("DB ROLE:", user.Role)
 
-	if existingUser.ID != 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "User already exists",
+	// User not found
+	if user.ID == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "User not found",
 		})
 		return
 	}
 
-	hashedPassword, _ := bcrypt.GenerateFromPassword(
+	// Compare password
+	err := bcrypt.CompareHashAndPassword(
+		[]byte(user.Password),
 		[]byte(input.Password),
-		bcrypt.DefaultCost,
 	)
 
-	user := models.User{
-		Name:     input.Name,
-		Email:    input.Email,
-		Password: string(hashedPassword),
-
-		// Force admin role for public registration
-		Role: "admin",
-	}
-
-	config.DB.Create(&user)
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Admin registered successfully",
-	})
-}
-
-func Login(c *gin.Context) {
-
-	var input LoginInput
-	var user models.User
-
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	config.DB.Where("email = ?", input.Email).First(&user)
-	if user.ID == 0 {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
-		return
-	}
-
-	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password))
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+
+		println("PASSWORD CHECK FAILED")
+		println("HASH IN DB:", user.Password)
+		println("BCRYPT ERROR:", err.Error())
+
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error":   "Password mismatch",
+			"details": err.Error(),
+		})
 		return
 	}
 
-	token, err := utils.GenerateToken(user.ID, user.Email, user.Role)
+	println("LOGIN SUCCESSFUL")
+
+	token, err := utils.GenerateToken(
+		user.ID,
+		user.Email,
+		user.Role,
+	)
+
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Could not generate token",
+		})
 		return
 	}
 
