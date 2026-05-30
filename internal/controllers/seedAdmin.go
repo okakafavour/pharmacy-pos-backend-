@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"pharmacy-pos-backend/config"
 	"pharmacy-pos-backend/internal/models"
 
@@ -9,6 +10,8 @@ import (
 )
 
 func SeedAdmin() {
+	log.Println("========== SEED ADMIN STARTED ==========")
+
 	var admin models.User
 
 	config.DB.Where("email = ?", "admin@pharmacy.com").First(&admin)
@@ -35,4 +38,6 @@ func SeedAdmin() {
 	} else {
 		fmt.Println("Admin already exists")
 	}
+	log.Println("========== SEED ADMIN FINISHED ==========")
+
 }
