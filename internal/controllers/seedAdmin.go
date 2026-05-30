@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"log"
 	"pharmacy-pos-backend/config"
 	"pharmacy-pos-backend/internal/models"
@@ -14,16 +13,25 @@ func SeedAdmin() {
 
 	var admin models.User
 
-	config.DB.Where("email = ?", "admin@pharmacy.com").First(&admin)
+	result := config.DB.Where("email = ?", "admin@pharmacy.com").First(&admin)
+
+	if result.Error != nil {
+		log.Println("Find admin error:", result.Error)
+	}
 
 	if admin.ID == 0 {
 
-		fmt.Println("Creating admin user...")
+		log.Println("Creating admin user...")
 
-		hashedPassword, _ := bcrypt.GenerateFromPassword(
+		hashedPassword, err := bcrypt.GenerateFromPassword(
 			[]byte("Admin123@"),
 			bcrypt.DefaultCost,
 		)
+
+		if err != nil {
+			log.Println("Hash error:", err)
+			return
+		}
 
 		admin = models.User{
 			Name:     "System Administrator",
@@ -32,12 +40,17 @@ func SeedAdmin() {
 			Role:     "admin",
 		}
 
-		config.DB.Create(&admin)
+		result := config.DB.Create(&admin)
 
-		fmt.Println("Admin created successfully")
+		if result.Error != nil {
+			log.Println("ADMIN CREATE ERROR:", result.Error)
+		} else {
+			log.Println("Admin created successfully. ID:", admin.ID)
+		}
+
 	} else {
-		fmt.Println("Admin already exists")
+		log.Println("Admin already exists. ID:", admin.ID)
 	}
-	log.Println("========== SEED ADMIN FINISHED ==========")
 
+	log.Println("========== SEED ADMIN FINISHED ==========")
 }

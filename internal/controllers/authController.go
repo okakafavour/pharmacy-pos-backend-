@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"log"
 	"os"
 
 	"net/http"
@@ -123,6 +124,16 @@ func Login(c *gin.Context) {
 	println("USER ID:", user.ID)
 	println("DB EMAIL:", user.Email)
 	println("DB ROLE:", user.Role)
+
+	var users []models.User
+
+	config.DB.Find(&users)
+
+	log.Println("====== USERS IN DATABASE ======")
+
+	for _, u := range users {
+		log.Printf("ID=%d EMAIL=%s ROLE=%s\n", u.ID, u.Email, u.Role)
+	}
 
 	// User not found
 	if user.ID == 0 {
