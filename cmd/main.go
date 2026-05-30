@@ -2,6 +2,7 @@ package main
 
 import (
 	"pharmacy-pos-backend/config"
+	"pharmacy-pos-backend/internal/controllers"
 	"pharmacy-pos-backend/internal/models"
 	"pharmacy-pos-backend/internal/routes"
 
@@ -20,6 +21,7 @@ func main() {
 		&models.Restock{},
 		&models.Customer{},
 	)
+	controllers.SeedAdmin()
 
 	router := gin.Default()
 
