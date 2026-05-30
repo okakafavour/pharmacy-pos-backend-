@@ -13,7 +13,6 @@ var DB *gorm.DB
 
 func ConnectDatabase() {
 
-	// Load .env only for local development
 	_ = godotenv.Load()
 
 	dsn := os.Getenv("DATABASE_URL")
@@ -22,7 +21,14 @@ func ConnectDatabase() {
 		log.Fatal("DATABASE_URL is not set")
 	}
 
-	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	database, err := gorm.Open(
+		postgres.New(postgres.Config{
+			DSN:                  dsn,
+			PreferSimpleProtocol: true,
+		}),
+		&gorm.Config{},
+	)
+
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
