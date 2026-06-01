@@ -4,10 +4,31 @@ import (
 	"pharmacy-pos-backend/internal/controllers"
 	middleware "pharmacy-pos-backend/internal/middlewares"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRoutes(router *gin.Engine) {
+
+	// CORS
+	router.Use(cors.New(cors.Config{
+		AllowOrigins: []string{
+			"http://localhost:5173",
+		},
+		AllowMethods: []string{
+			"GET",
+			"POST",
+			"PUT",
+			"DELETE",
+			"OPTIONS",
+		},
+		AllowHeaders: []string{
+			"Origin",
+			"Content-Type",
+			"Authorization",
+		},
+		AllowCredentials: true,
+	}))
 
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -18,14 +39,12 @@ func SetupRoutes(router *gin.Engine) {
 	// Public Routes
 	router.POST("/login", controllers.Login)
 	router.POST("/google/login", controllers.GoogleLogin)
-	// router.POST("/register", controllers.Register)
 
 	// Protected Routes
 	authorized := router.Group("/")
 	authorized.Use(middleware.AuthMiddleware())
 
 	{
-		// Any logged in user
 		authorized.GET("/medicines", controllers.GetMedicines)
 		authorized.GET("/medicines/barcode/:barcode", controllers.GetMedicineByBarcode)
 
@@ -36,24 +55,14 @@ func SetupRoutes(router *gin.Engine) {
 		authorized.GET("/sales/:id/receipt", controllers.GetReceipt)
 		authorized.GET("/receipt/:id/pdf", controllers.DownloadReceiptPDF)
 
-		// Sales Routes
 		sales := authorized.Group("/")
-		sales.Use(middleware.RequireRole(
-			"admin",
-			"cashier",
-		))
-
+		sales.Use(middleware.RequireRole("admin", "cashier"))
 		{
 			sales.POST("/sales", controllers.CreateSale)
 		}
 
-		// Medicine Management
 		medicine := authorized.Group("/")
-		medicine.Use(middleware.RequireRole(
-			"admin",
-			"pharmacist",
-		))
-
+		medicine.Use(middleware.RequireRole("admin", "pharmacist"))
 		{
 			medicine.POST("/medicines", controllers.CreateMedicine)
 			medicine.PUT("/medicines/:id", controllers.UpdateMedicine)
@@ -64,36 +73,24 @@ func SetupRoutes(router *gin.Engine) {
 			medicine.GET("/medicines/expiring-soon", controllers.GetExpiringSoonMedicines)
 		}
 
-		// Reports
 		reports := authorized.Group("/")
-		reports.Use(middleware.RequireRole(
-			"admin",
-			"manager",
-		))
-
+		reports.Use(middleware.RequireRole("admin", "manager"))
 		{
 			reports.GET("/dashboard/stats", controllers.GetDashboardStats)
 			reports.GET("/reports/daily-sales", controllers.GetDailySalesReport)
 			reports.GET("/reports/top-medicines", controllers.GetTopMedicines)
 		}
 
-		// Supplier Management
 		suppliers := authorized.Group("/")
-		suppliers.Use(middleware.RequireRole(
-			"admin",
-			"manager",
-		))
-
+		suppliers.Use(middleware.RequireRole("admin", "manager"))
 		{
 			suppliers.POST("/suppliers", controllers.CreateSupplier)
 			suppliers.GET("/suppliers", controllers.GetSuppliers)
 			suppliers.POST("/restocks", controllers.CreateRestock)
 		}
 
-		// Admin Only
 		admin := authorized.Group("/")
 		admin.Use(middleware.RequireRole("admin"))
-
 		{
 			admin.POST("/users", controllers.CreateUser)
 		}
