@@ -88,6 +88,7 @@ func SetupRoutes(router *gin.Engine) {
 			suppliers.POST("/suppliers", controllers.CreateSupplier)
 			suppliers.GET("/suppliers", controllers.GetSuppliers)
 			suppliers.POST("/restocks", controllers.CreateRestock)
+			suppliers.GET("/restocks", controllers.GetRestocks)
 		}
 
 		admin := authorized.Group("/")

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"time"
 
 	"pharmacy-pos-backend/config"
 	"pharmacy-pos-backend/internal/models"
@@ -37,6 +38,14 @@ func CreateRestock(c *gin.Context) {
 		return
 	}
 
+	// Check if medicine is expired
+	if medicine.ExpireDate.Before(time.Now()) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Cannot restock expired medicine",
+		})
+		return
+	}
+
 	var supplier models.Supplier
 
 	config.DB.First(&supplier, input.SupplierID)
@@ -67,5 +76,19 @@ func CreateRestock(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Medicine restocked successfully",
 		"data":    restock,
+	})
+}
+func GetRestocks(c *gin.Context) {
+
+	var restocks []models.Restock
+
+	config.DB.
+		Preload("Medicine").
+		Preload("Supplier").
+		Order("created_at DESC").
+		Find(&restocks)
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": restocks,
 	})
 }
