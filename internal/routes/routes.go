@@ -14,6 +14,7 @@ func SetupRoutes(router *gin.Engine) {
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
 			"http://localhost:5173",
+			"https://pharmacy-pos-frontend-bice.vercel.app/",
 		},
 		AllowMethods: []string{
 			"GET",
