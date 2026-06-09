@@ -256,3 +256,12 @@ func GoogleLogin(c *gin.Context) {
 		},
 	})
 }
+func GetUsers(c *gin.Context) {
+	var users []models.User
+
+	config.DB.Find(&users)
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": users,
+	})
+}

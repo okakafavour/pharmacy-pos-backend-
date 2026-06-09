@@ -95,6 +95,8 @@ func SetupRoutes(router *gin.Engine) {
 		admin.Use(middleware.RequireRole("admin"))
 		{
 			admin.POST("/users", controllers.CreateUser)
+			admin.GET("/users", controllers.GetUsers)
+
 		}
 	}
 }
